@@ -48,32 +48,42 @@ function Todos(): JSX.Element {
           align:'centre',
           textAlign:'left',
           justifyContent: 'space-between',
+          position: 'relative' ,
+          '@media (min-width: 768px)': {
+            width: '60%',
+          },
+          '@media (min-width: 1024px)': {
+            width: '30%',
+          },
          // flexWrap: 'wrap',
 
         }}
       >
         <Stack  direction="column">
-          <Typography variant="h2" sx={{ ml: '50px' , mt:'15px'}}>Todo List</Typography>
-          <Typography variant="subtitle1"sx={{ marginLeft: '60px', mb:'15px' }}>A simple React Todo List App</Typography>
+          <Typography variant="h2" sx={{ ml: '50px' , mt:'15px',fontWeight:'bold'}}>Todo List</Typography>
+          <Typography variant="subtitle1"sx={{ marginLeft: '60px', mb:'15px', fontWeight:'bold'}}>A simple React Todo List App</Typography>
           <hr style={{  margin:'center',marginInlineStart: '7%', marginInlineEnd: '7%'  }} />
         </Stack>
 
         <Stack  direction="column"
           sx={{
-            gap: '50rem',
+           //gap: '50rem',
+           position:'absolute',
+           width:'100%',
+           left:0
+           
           }}
         >
           <Card
-            className="root"
             variant="outlined"
-            sx={{ background: "rgba(255, 205, 210, 0.25)"  }}
+            sx={{background:'#ff5252',maxHeight:'300px', overflowY: 'auto'}}
           >
             <CardContent sx={{
-display: 'flex', alignItems: 'center', justifyContent: 'space-between'               }}>
-               <Typography variant="h5" component="h2" color="white">
+                 display:"flex", alignItems: 'center', justifyContent: 'space-between' ,background: "rgba(255, 205, 210, 0.25)"        }}>
+               <Typography variant="h5" component="h2" color="white" marginLeft="50px">
                  Task 1
                </Typography>
-               <Box>
+               <Box marginRight='50px'>
                <IconButton aria-label="edit">
                   <EditIcon sx={{color:"white"}}/>
                </IconButton>
@@ -92,25 +102,35 @@ display: 'flex', alignItems: 'center', justifyContent: 'space-between'          
         <Stack  direction="column" 
            sx={{
             //display: 'flex',
-            mt:'330px',
+            //mt:'330px',
+            position: 'absolute',
+            bottom: '50px',
+            //left: '35%',
+            //transform: 'translateX(-50%)',
+            width: '100%',
             flexDirection: 'column',
           }}>
-          <Typography variant="h6" sx={{ marginLeft: '60px',mb:'5px'}}>New Todo</Typography>
+          <Typography variant="h6" sx={{ marginLeft:  '60px',mb:'5px',fontWeight: 'bold' }}>New Todo</Typography>
           <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-             <TextField label="New Todo" variant="outlined" sx={{ marginLeft: '60px',
-             '& .MuiOutlinedInput-root': {
-              backgroundColor: 'white',
-             '&:hover fieldset': {
-              borderColor: 'white',
-              },
-             '&.Mui-focused fieldset': {
-              borderColor: '#ff5252',
+             <TextField label={
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                      New Todo
+                    </Typography>}
+                    variant="outlined" font-Weight='Bold'sx={{ marginLeft: '60px', width:' 330px', fontWeight:'Bold',
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'white',
+                  '&:hover fieldset': {
+                    borderColor: 'white',
+                    },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ff5252',
               },
               },}}/>
              <Button variant="outlined" size="large" sx={{
               backgroundColor: '#ff5252',
               borderColor: 'white',
               color: 'white',
+              fontWeight: 'bold' ,
               '&:hover': {
                 backgroundColor: 'black',
               },
