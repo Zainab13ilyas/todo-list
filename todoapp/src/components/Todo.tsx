@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   TextField,
   Card,
@@ -13,7 +12,6 @@ import { makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import background from "../assets/backdrop.jpg";
-
 
 const useStyles = makeStyles({
   root: {
@@ -173,13 +171,12 @@ const useStyles = makeStyles({
   }
 })
 
-
 function Todos(): JSX.Element {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
+    <Stack className={classes.root}>
       <Box
         component="div" className={classes.container}
       >
@@ -197,7 +194,6 @@ function Todos(): JSX.Element {
           <hr
             className={classes.hr} />
         </Stack>
-
 
         <Stack
           direction="column"
@@ -224,6 +220,7 @@ function Todos(): JSX.Element {
             </CardContent>
           </Card>
         </Stack>
+
         <Stack
           direction="column"
           className={classes.newTodo}
@@ -256,7 +253,7 @@ function Todos(): JSX.Element {
           </Box>
         </Stack>
       </Box>
-    </div>
+    </Stack>
   );
 }
 
