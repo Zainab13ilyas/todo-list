@@ -7,15 +7,13 @@ import {
   Typography,
   Button,
   Stack,
-  IconButton, Theme, useMediaQuery
+  IconButton, useMediaQuery
 } from "@mui/material";
-import { makeStyles, useTheme } from '@mui/styles';
-import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import background from "../assets/backdrop.jpg";
 
-//const theme = createTheme();
 
 const useStyles = makeStyles({
   root: {
