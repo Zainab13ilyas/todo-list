@@ -1,3 +1,4 @@
+import { useState, ChangeEvent, FormEvent } from "react";
 import {
   TextField,
   Card,
@@ -6,7 +7,8 @@ import {
   Typography,
   Button,
   Stack,
-  IconButton, useMediaQuery
+  IconButton, useMediaQuery,
+  List, ListItem, ListItemText, Modal
 } from "@mui/material";
 import { makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
@@ -81,11 +83,12 @@ const useStyles = makeStyles({
       background: '#ff5252',
       maxHeight: '300px',
       overflowY: 'auto',
+      marginBottom: "10px",
+
     }
   },
   cardContent: {
     "&&": {
-      display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       background: 'rgba(255, 205, 210, 0.25)',
@@ -102,6 +105,7 @@ const useStyles = makeStyles({
     "&&": {
       color: "white",
       marginLeft: "50px",
+      cursor: "pointer"
     }
   },
   newTodo: {
@@ -168,13 +172,113 @@ const useStyles = makeStyles({
         }
       }
     }
+  },
+  popUp: {
+    "&&": {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: 'white',
+      width: '300px',
+      p: '1rem',
+      borderRadius: '8px',
+    }
+  },
+  popUpButton: {
+    "&&": {
+      width: '100%',
+      backgroundColor: '#ff5252',
+      color: 'white'
+    }
   }
 })
+
+type Todo = {
+  id: string;
+  text: string;
+  completed: boolean
+};
 
 function Todos(): JSX.Element {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
   const classes = useStyles();
+  const [text, setText] = useState("");
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("fdfd")
+
+    setText(e.target.value);
+  }
+  const createTodo = (e: FormEvent) => {
+    e.preventDefault();
+    setText("");
+
+    if (text.trim() === '') {
+      return;
+    }
+
+    if (selectedTodo) {
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) => {
+          if (todo.id === selectedTodo.id) {
+            return { ...todo, text: text.trim() };
+          }
+          return todo;
+        })
+      );
+      setSelectedTodo(null);
+    } else {
+      const newTodo: Todo = {
+        id: Date.now().toString(),
+        text: text.trim(),
+        completed: false,
+      };
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
+    }
+
+    setText('');
+  };
+
+  const deleteTodo = (id: string) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  };
+
+  const openModal = (todo: Todo) => {
+    setSelectedTodo(todo);
+    setText(todo.text);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedTodo(null);
+    setText('');
+    setIsModalOpen(false);
+  };
+  const updateTodo = () => {
+    if (selectedTodo) {
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) => {
+          if (todo.id === selectedTodo.id) {
+            return { ...todo, text: text.trim() };
+          }
+          return todo;
+        })
+      );
+      closeModal();
+    }
+  };
+  const toggleTodo = (id: string) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+
+  };
   return (
     <Stack className={classes.root}>
       <Box
@@ -197,28 +301,32 @@ function Todos(): JSX.Element {
 
         <Stack
           direction="column"
-          className={classes.stacktwo}>
-          <Card
-            variant="outlined"
-            className={classes.card}>
-            <CardContent
-              className={classes.cardContent}>
-              <Typography
-                variant="h5"
-                component="h2"
-                className={classes.taskName}>
-                Task 1
-              </Typography>
-              <Box sx={{ marginRight: "50px" }}>
-                <IconButton aria-label="edit">
-                  <EditIcon sx={{ color: "white" }} />
-                </IconButton>
-                <IconButton aria-label="delele">
-                  <DeleteIcon sx={{ color: "white" }} />
-                </IconButton>
-              </Box>
-            </CardContent>
-          </Card>
+          className={classes.stacktwo}
+        >
+          {todos.length > 0 && (
+            <Card
+              variant="outlined"
+              className={classes.card}>
+              <CardContent className={classes.cardContent}>
+                <Box sx={{ marginRight: "50px" }}>
+                  <List >
+                    {todos.map((todo) => (
+                      <ListItem key={todo.id} >
+                        <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo.id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                        />
+                        <IconButton aria-label="edit" onClick={() => openModal(todo)}>
+                          <EditIcon sx={{ color: "white" }} />
+                        </IconButton>
+                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo.id)}>
+                          <DeleteIcon sx={{ color: "white" }} />
+                        </IconButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              </CardContent>
+            </Card>
+          )}
         </Stack>
 
         <Stack
@@ -234,24 +342,47 @@ function Todos(): JSX.Element {
           >
             <TextField
               label={
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }} >
                   New Todo
                 </Typography>
               }
               variant="outlined"
               className={classes.todoTextField}
+              value={text}
               sx={{ width: isSmallScreen ? "50%" : "60%", }}
+              onChange={handleChange}
             />
             <Button
               variant="outlined"
               size="large"
               sx={{ width: isSmallScreen ? '100%' : 'auto' }}
               className={classes.todoButton}
+              onClick={createTodo}
             >
               Add Todo
             </Button>
           </Box>
         </Stack>
+        <Modal open={isModalOpen} >
+          <Box className={classes.popUp}
+          >
+            <TextField
+              label="Edit Todo"
+              variant="outlined"
+              onChange={handleChange}
+              type="text"
+              value={text}
+              sx={{ width: '100%', mb: '1rem' }}
+            />
+            <Button
+              variant="outlined"
+              className={classes.popUpButton}
+              onClick={updateTodo}
+            >
+              Update Todo
+            </Button>
+          </Box>
+        </Modal>
       </Box>
     </Stack>
   );
