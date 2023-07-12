@@ -1,117 +1,221 @@
 import React, { useState } from "react";
 import {
-  Container,
   TextField,
-  List,
   Card,
   CardContent,
-  colors,
   Box,
   Typography,
   Button,
   Stack,
-  IconButton, useTheme, useMediaQuery
+  IconButton, Theme, useMediaQuery
 } from "@mui/material";
+import { makeStyles, useTheme } from '@mui/styles';
+import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles';
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import background from "../images/back.jpg";
+import background from "../assets/backdrop.jpg";
+
+//const theme = createTheme();
+
+const useStyles = makeStyles({
+  root: {
+    "&&": {
+      backgroundImage: `url(${background})`,
+      height: '100vh',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      width: '100vw',
+      backgroundRepeat: 'no-repeat',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }
+  },
+  container: {
+    "&&": {
+      backgroundColor: '#ff5252',
+      color: 'white',
+      padding: '1rem',
+      width: '30%',
+      height: '70vh',
+      boxShadow: '5px 5px 25px -5px rgba(0,0,0,0.5)',
+      borderRadius: 0,
+      margin: 'auto',
+      textAlign: 'left',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      position: 'relative',
+      "@media (min-width: 768px)": {
+        width: "40%",
+      },
+      "@media (min-width: 1592px)": {
+        width: "30%",
+      },
+    }
+
+  },
+  firststack: {
+    "&&": {
+      marginBottom: '40px'
+    }
+  },
+  headings: {
+    "&&": {
+      marginLeft: '50px',
+      marginTop: '15px',
+      fontWeight: 'bold',
+    }
+  },
+  subheadings: {
+    "&&": {
+      marginLeft: '60px',
+      mb: '15px',
+      fontWeight: 'bold',
+    }
+  },
+  hr: {
+    "&&": {
+      margin: 'center',
+      marginInlineStart: '7%',
+      marginInlineEnd: '7%',
+    }
+  },
+  card: {
+    "&&": {
+      background: '#ff5252',
+      maxHeight: '300px',
+      overflowY: 'auto',
+    }
+  },
+  cardContent: {
+    "&&": {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      background: 'rgba(255, 205, 210, 0.25)',
+    }
+  },
+  stacktwo: {
+    "&&": {
+      position: "absolute",
+      width: "100%",
+      left: 0,
+    }
+  },
+  taskName: {
+    "&&": {
+      color: "white",
+      marginLeft: "50px",
+    }
+  },
+  newTodo: {
+    "&&": {
+      position: 'absolute',
+      bottom: '50px',
+      width: '100%',
+      flexDirection: 'column',
+      marginLeft: '60px',
+      marginRight: '50px',
+      overflowY: 'auto',
+    }
+  },
+  todoHeading: {
+    "&&": {
+      mb: '5px',
+      fontWeight: 'bold',
+    }
+  },
+  todoContainer: {
+    "&&": {
+      gap: '0.4rem',
+      marginRight: '60px',
+      display: 'flex',
+    }
+  },
+  todoTextField: {
+    "&&": {
+      width: '60%',
+      fontWeight: 'bold',
+      borderRadius: 0,
+      '& .MuiOutlinedInput-root': {
+        backgroundColor: 'white',
+        '&:hover fieldset': {
+          borderColor: 'white',
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: '#ff5252',
+        },
+      },
+      "@media (max-width: 600px)": {
+        todoTextField: {
+          width: '50%',
+        }
+      }
+    }
+  },
+  todoButton: {
+    "&&": {
+      backgroundColor: '#ff5252',
+      borderColor: 'white',
+      color: 'white',
+      fontWeight: 'bold',
+      borderRadius: 0,
+      '&:hover': {
+        backgroundColor: 'black',
+      },
+      '&:focus': {
+        outlineColor: '#ff5252',
+      },
+      "@media (max-width: 600px)": {
+        todoButton: {
+          width: '100%',
+        }
+      }
+    }
+  }
+})
+
 
 function Todos(): JSX.Element {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const myStyle = {
-    backgroundImage: `url(${background})`,
-    height: "100vh",
-    //marginTop:'-20px',
-    //fontSize:'50px',
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    width: "100vw",
-    backgroundRepeat: "no-repeat",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  };
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
+  const classes = useStyles();
 
   return (
-    <div style={myStyle}>
+    <div className={classes.root}>
       <Box
-        component="div"
-        sx={{
-          backgroundColor: "#ff5252",
-          color: "white",
-          padding: "1rem",
-          width: "30%",
-          height: "70vh",
-          boxShadow: "5px 5px 25px -5px rgba(0,0,0,0.5)",
-          borderRadius: "0px",
-          margin: "auto",
-          align: "centre",
-          textAlign: "left",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "relative",
-          "@media (min-width: 768px)": {
-            width: "40%",
-          },
-          "@media (min-width: 1592px)": {
-            width: "30%",
-          },
-
-          // flexWrap: 'wrap',
-        }}>
-        <Stack direction="column" sx={{ mb: '40px' }}>
+        component="div" className={classes.container}
+      >
+        <Stack direction="column" className={classes.firststack}>
           <Typography
             variant="h2"
-            sx={{ ml: "50px", mt: "15px", fontWeight: "bold" }}>
+            className={classes.headings}>
             Todo List
           </Typography>
           <Typography
             variant="subtitle1"
-            sx={{ marginLeft: "60px", mb: "15px", fontWeight: "bold" }}>
+            className={classes.subheadings}>
             A simple React Todo List App
           </Typography>
           <hr
-            style={{
-              margin: "center",
-              marginInlineStart: "7%",
-              marginInlineEnd: "7%",
-            }}
-          />
+            className={classes.hr} />
         </Stack>
 
 
         <Stack
           direction="column"
-          sx={{
-            //gap: '50rem',
-            position: "absolute",
-            width: "100%",
-            left: 0,
-          }}>
+          className={classes.stacktwo}>
           <Card
             variant="outlined"
-            sx={{
-              background: "#ff5252",
-              maxHeight: "300px",
-              overflowY: "auto",
-            }}>
+            className={classes.card}>
             <CardContent
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                background: "rgba(255, 205, 210, 0.25)",
-              }}>
+              className={classes.cardContent}>
               <Typography
                 variant="h5"
                 component="h2"
-                color="white"
-                marginLeft="50px">
+                className={classes.taskName}>
                 Task 1
               </Typography>
-              <Box marginRight="50px">
+              <Box sx={{ marginRight: "50px" }}>
                 <IconButton aria-label="edit">
                   <EditIcon sx={{ color: "white" }} />
                 </IconButton>
@@ -124,25 +228,15 @@ function Todos(): JSX.Element {
         </Stack>
         <Stack
           direction="column"
-          sx={{
-            position: "absolute",
-            bottom: "50px",
-            width: "100%",
-            flexDirection: "column",
-            marginLeft: "60px",
-            marginRight: "50px",
-            overflowY: "auto",
-            //display: "flex"
-            //alignItems: 'center'
-          }}>
+          className={classes.newTodo}
+        >
           <Typography
             variant="h6"
-            sx={{ mb: "5px", fontWeight: "bold" }}>
+            className={classes.todoHeading}>
             New Todo
           </Typography>
-          <Box sx={{
-            gap: "0.4rem", marginRight: "60px", display: "flex"
-          }}>
+          <Box className={classes.todoContainer}
+          >
             <TextField
               label={
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
@@ -150,40 +244,15 @@ function Todos(): JSX.Element {
                 </Typography>
               }
               variant="outlined"
-              font-Weight="Bold"
-              sx={{
-                //width: "330px",
-                width: isSmallScreen ? "50%" : "60%",
-                fontWeight: "Bold",
-                borderRadius: 0,
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "white",
-                  "&:hover fieldset": {
-                    borderColor: "white",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#ff5252",
-                  },
-                },
-              }}
+              className={classes.todoTextField}
+              sx={{ width: isSmallScreen ? "50%" : "60%", }}
             />
             <Button
               variant="outlined"
               size="large"
-              sx={{
-                backgroundColor: "#ff5252",
-                borderColor: "white",
-                color: "white",
-                fontWeight: "bold",
-                borderRadius: 0,
-                width: isSmallScreen ? "100%" : "auto",
-                "&:hover": {
-                  backgroundColor: "black",
-                },
-                "&:focus": {
-                  outlineColor: "#ff5252",
-                },
-              }}>
+              sx={{ width: isSmallScreen ? '100%' : 'auto' }}
+              className={classes.todoButton}
+            >
               Add Todo
             </Button>
           </Box>
@@ -194,3 +263,4 @@ function Todos(): JSX.Element {
 }
 
 export default Todos;
+// End of File (EOF)
