@@ -7,14 +7,14 @@ import {
   Button,
   Stack,
   IconButton, useMediaQuery,
-  List, ListItem, ListItemText, Modal, Grid
+  List, ListItem, ListItemText
 } from "@mui/material";
 import { makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import background from "../assets/backdrop.jpg";
 import TodoModal from './EditTodoModal';
-import { useGlobalState } from "../store/todoStore";
+import { useGlobalState } from "../store/TodoStore";
 
 const useStyles = makeStyles({
   root: {

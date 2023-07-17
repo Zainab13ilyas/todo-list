@@ -1,7 +1,7 @@
 import { ChangeEvent, useState, useEffect } from 'react';
 import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { useGlobalState } from '../store/todoStore';
+import { useGlobalState } from '../store/TodoStore';
 const useStyles = makeStyles({
   popUp: {
     "&&": {
