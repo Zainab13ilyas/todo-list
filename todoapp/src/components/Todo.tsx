@@ -1,182 +1,84 @@
+import React from "react";
 import {
   TextField,
   Card,
-  CardContent,
   Box,
   Typography,
   Button,
   Stack,
-  IconButton, useMediaQuery
+  IconButton, useMediaQuery,
+  List, ListItem, ListItemText
 } from "@mui/material";
-import { makeStyles } from '@mui/styles';
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import background from "../assets/backdrop.jpg";
+import TodoModal from 'components/EditTodoModal';
+import { useGlobalState } from "store/TodoStore";
+import useStyles from 'styles/TodoStyles';
+import { useHookstate } from "@hookstate/core";
 
-const useStyles = makeStyles({
-  root: {
-    "&&": {
-      backgroundImage: `url(${background})`,
-      height: '100vh',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      width: '100vw',
-      backgroundRepeat: 'no-repeat',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }
-  },
-  container: {
-    "&&": {
-      backgroundColor: '#ff5252',
-      color: 'white',
-      padding: '1rem',
-      width: '30%',
-      height: '70vh',
-      boxShadow: '5px 5px 25px -5px rgba(0,0,0,0.5)',
-      borderRadius: 0,
-      margin: 'auto',
-      textAlign: 'left',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'relative',
-      "@media (min-width: 768px)": {
-        width: "40%",
-      },
-      "@media (min-width: 1592px)": {
-        width: "30%",
-      },
-    }
+type Todo = {
+  id: string;
+  text: string;
+  completed: boolean
+}
 
-  },
-  firststack: {
-    "&&": {
-      marginBottom: '40px'
-    }
-  },
-  headings: {
-    "&&": {
-      marginLeft: '50px',
-      marginTop: '15px',
-      fontWeight: 'bold',
-    }
-  },
-  subheadings: {
-    "&&": {
-      marginLeft: '60px',
-      mb: '15px',
-      fontWeight: 'bold',
-    }
-  },
-  hr: {
-    "&&": {
-      margin: 'center',
-      marginInlineStart: '7%',
-      marginInlineEnd: '7%',
-    }
-  },
-  card: {
-    "&&": {
-      background: '#ff5252',
-      maxHeight: '300px',
-      overflowY: 'auto',
-    }
-  },
-  cardContent: {
-    "&&": {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      background: 'rgba(255, 205, 210, 0.25)',
-    }
-  },
-  stacktwo: {
-    "&&": {
-      position: "absolute",
-      width: "100%",
-      left: 0,
-    }
-  },
-  taskName: {
-    "&&": {
-      color: "white",
-      marginLeft: "50px",
-    }
-  },
-  newTodo: {
-    "&&": {
-      position: 'absolute',
-      bottom: '50px',
-      width: '100%',
-      flexDirection: 'column',
-      marginLeft: '60px',
-      marginRight: '50px',
-      overflowY: 'auto',
-    }
-  },
-  todoHeading: {
-    "&&": {
-      mb: '5px',
-      fontWeight: 'bold',
-    }
-  },
-  todoContainer: {
-    "&&": {
-      gap: '0.4rem',
-      marginRight: '60px',
-      display: 'flex',
-    }
-  },
-  todoTextField: {
-    "&&": {
-      width: '60%',
-      fontWeight: 'bold',
-      borderRadius: 0,
-      '& .MuiOutlinedInput-root': {
-        backgroundColor: 'white',
-        '&:hover fieldset': {
-          borderColor: 'white',
-        },
-        '&.Mui-focused fieldset': {
-          borderColor: '#ff5252',
-        },
-      },
-      "@media (max-width: 600px)": {
-        todoTextField: {
-          width: '50%',
-        }
-      }
-    }
-  },
-  todoButton: {
-    "&&": {
-      backgroundColor: '#ff5252',
-      borderColor: 'white',
-      color: 'white',
-      fontWeight: 'bold',
-      borderRadius: 0,
-      '&:hover': {
-        backgroundColor: 'black',
-      },
-      '&:focus': {
-        outlineColor: '#ff5252',
-      },
-      "@media (max-width: 600px)": {
-        todoButton: {
-          width: '100%',
-        }
-      }
-    }
-  }
-})
-
-function Todos(): JSX.Element {
+const Todos = () => {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
   const classes = useStyles();
+  const { tasksList } = useGlobalState();
+  const text = useHookstate("");
+  const selectedTodoState = useHookstate<string | null>(null);
 
+  const handleChange = (value: string) => {
+    text.set(value);
+  }
+  const createTodo = () => {
+    const newText = text.get().trim()
+    const prevTodos = tasksList.get();
+    if (selectedTodoState.value && prevTodos) {
+      const updatedTodos = prevTodos.map((todo) => {
+        if (todo.id === selectedTodoState.value) {
+          return { ...todo, text: newText };
+        }
+        return todo;
+      });
+
+      tasksList.set(updatedTodos);
+      selectedTodoState.set(null);
+    } else {
+      const newTodo: Todo = {
+        id: Date.now().toString(),
+        text: newText,
+        completed: false,
+      };
+      tasksList.set((prevTodos: Todo[]) => [...prevTodos, newTodo]);
+    }
+
+    text.set('');
+  };
+
+  const deleteTodo = (id: string) => {
+    tasksList.set((prevTodos: Todo[]) =>
+      prevTodos.filter((todo) => todo.id !== id)
+    );
+  };
+
+  const closeModal = () => {
+    selectedTodoState.set(null);
+  };
+
+  const toggleTodo = (id: string) => {
+    const prevTodos = tasksList.get({ noproxy: true });
+    if (prevTodos) {
+      const todos = prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+      tasksList.set(todos);
+    }
+
+  };
   return (
-    <Stack className={classes.root}>
+    <Stack className={classes.root} >
       <Box
         component="div" className={classes.container}
       >
@@ -197,28 +99,36 @@ function Todos(): JSX.Element {
 
         <Stack
           direction="column"
-          className={classes.stacktwo}>
-          <Card
-            variant="outlined"
-            className={classes.card}>
-            <CardContent
-              className={classes.cardContent}>
-              <Typography
-                variant="h5"
-                component="h2"
-                className={classes.taskName}>
-                Task 1
-              </Typography>
-              <Box sx={{ marginRight: "50px" }}>
-                <IconButton aria-label="edit">
-                  <EditIcon sx={{ color: "white" }} />
-                </IconButton>
-                <IconButton aria-label="delele">
-                  <DeleteIcon sx={{ color: "white" }} />
-                </IconButton>
-              </Box>
-            </CardContent>
-          </Card>
+          className={classes.stacktwo}
+        >
+          {tasksList.value.length && (
+            <Card
+              variant="outlined"
+              className={classes.card}>
+              <List >
+                {tasksList.value.map((todo: Todo, index: number) => (
+                  <React.Fragment key={todo.id}>
+                    <ListItem key={todo.id} className={classes.listItem}>
+                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo.id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                      />
+                      <Box sx={{ marginRight: "50px" }}>
+                        <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo.id)}>
+                          <EditIcon sx={{ color: "white" }} />
+                        </IconButton>
+                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo.id)}>
+                          <DeleteIcon sx={{ color: "white" }} />
+                        </IconButton>
+                      </Box>
+                    </ListItem>
+                    {index !== tasksList.value.length - 1 &&
+                      <Box sx={{ marginBottom: '5px' }} />
+                    }
+
+                  </React.Fragment>
+                ))}
+              </List>
+            </Card>
+          )}
         </Stack>
 
         <Stack
@@ -234,26 +144,39 @@ function Todos(): JSX.Element {
           >
             <TextField
               label={
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }} >
                   New Todo
                 </Typography>
               }
               variant="outlined"
               className={classes.todoTextField}
+              value={text.value}
               sx={{ width: isSmallScreen ? "50%" : "60%", }}
+              onChange={(e) => handleChange(e.target.value)}
             />
             <Button
               variant="outlined"
               size="large"
               sx={{ width: isSmallScreen ? '100%' : 'auto' }}
               className={classes.todoButton}
+              disabled={!text.value}
+              onClick={(e) => {
+                e.preventDefault();
+                createTodo();
+              }}
             >
               Add Todo
             </Button>
           </Box>
         </Stack>
-      </Box>
-    </Stack>
+
+        <TodoModal
+          todoId={selectedTodoState.value}
+          handleCloseModal={closeModal}
+        />
+
+      </Box >
+    </Stack >
   );
 }
 

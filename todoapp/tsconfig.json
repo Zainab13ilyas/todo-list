@@ -18,9 +18,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "src",
+    "paths": {
+      "@mui/*": ["./mui/*"],
+      "@store/*": ["./store/*"],
+      "@components/*": ["./components/*"],
+      "@assets/*": ["./assets/*"],
+      "@styles/*":["./styles/*"]
+
+    }
   },
   "include": [
-    "src", "src/components"
+    "src", "src/components", "src/store", "src/styles"
   ]
 }
