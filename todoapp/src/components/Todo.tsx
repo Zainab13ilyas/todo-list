@@ -33,11 +33,12 @@ const Todos = () => {
     text.set(value);
   }
   const createTodo = () => {
+    const newText = text.get().trim()
     const prevTodos = tasksList.get();
     if (selectedTodoState.value && prevTodos) {
       const updatedTodos = prevTodos.map((todo) => {
         if (todo.id === selectedTodoState.value) {
-          return { ...todo, text: text.get().trim() };
+          return { ...todo, text: newText };
         }
         return todo;
       });
@@ -47,7 +48,7 @@ const Todos = () => {
     } else {
       const newTodo: Todo = {
         id: Date.now().toString(),
-        text: text.get().trim(),
+        text: newText,
         completed: false,
       };
       tasksList.set((prevTodos: Todo[]) => [...prevTodos, newTodo]);

@@ -67,7 +67,7 @@ const useStyles = makeStyles({
   card: {
     "&&": {
       background: '#ff5252',
-      maxHeight: '273px',
+      maxHeight: '350px',
       overflowY: 'auto',
       alignItems: 'center',
       padding: 0,
