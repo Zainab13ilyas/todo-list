@@ -63,10 +63,6 @@ const Todos = () => {
     );
   };
 
-  const openModal = (id: string) => {
-    selectedTodoState.set(id);
-  };
-
   const closeModal = () => {
     selectedTodoState.set(null);
   };
@@ -116,7 +112,7 @@ const Todos = () => {
                       <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo.id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
                       />
                       <Box sx={{ marginRight: "50px" }}>
-                        <IconButton aria-label="edit" onClick={() => openModal(todo.id)}>
+                        <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo.id)}>
                           <EditIcon sx={{ color: "white" }} />
                         </IconButton>
                         <IconButton aria-label="delele" onClick={() => deleteTodo(todo.id)}>
