@@ -13,7 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TodoModal from 'components/EditTodoModal';
 import { useGlobalState } from "store/TodoStore";
-import useStyles from 'styles/styles';
+import useStyles from 'styles/TodoStyles';
 import { useHookstate } from "@hookstate/core";
 
 type Todo = {
@@ -105,7 +105,7 @@ const Todos = () => {
           direction="column"
           className={classes.stacktwo}
         >
-          {tasksList.value.length > 0 && (
+          {tasksList.value.length && (
             <Card
               variant="outlined"
               className={classes.card}>
