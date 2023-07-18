@@ -59,11 +59,14 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   };
 
   const handleUpdate = () => {
-    tasksList.set(prevTodos =>
-      prevTodos.map(todo =>
+    const prevTodos = tasksList.get({ noproxy: true });
+
+    if (prevTodos) {
+      const todos = prevTodos.map((todo) =>
         todo.id === todoId ? { ...todo, text: text.get().trim() } : todo
       )
-    );
+      tasksList.set(todos);
+    }
     handleCloseModal();
   };
   return (

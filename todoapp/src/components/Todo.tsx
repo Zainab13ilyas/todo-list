@@ -71,11 +71,14 @@ const Todos = () => {
   };
 
   const toggleTodo = (id: string) => {
-    tasksList.set((prevTodos: Todo[]) =>
-      prevTodos.map((todo: Todo) =>
+    const prevTodos = tasksList.get({ noproxy: true });
+    if (prevTodos) {
+      const todos = prevTodos.map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
-    );
+      tasksList.set(todos);
+    }
+
   };
   return (
     <Stack className={classes.root} >
