@@ -1,7 +1,9 @@
-import { ChangeEvent, useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { useGlobalState } from '../store/TodoStore';
+import { useGlobalState } from 'store/TodoStore';
+import { useHookstate } from '@hookstate/core';
+
 const useStyles = makeStyles({
   popUp: {
     "&&": {
@@ -29,12 +31,6 @@ const useStyles = makeStyles({
   },
 })
 
-type Todo = {
-  id: string;
-  text: string;
-  completed?: boolean;
-};
-
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
@@ -43,29 +39,29 @@ type TodoModalProps = {
 const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
 
   const classes = useStyles();
-  const { todosState } = useGlobalState();
-  const [text, setText] = useState('');
+  const { tasksList } = useGlobalState();
+  const text = useHookstate('');
 
   useEffect(() => {
-    if (todosState.value) {
-      const selectedTodo = todosState.value.find(todo => todo.id === todoId);
+    if (tasksList.value) {
+      const selectedTodo = tasksList.value.find(todo => todo.id === todoId);
       if (selectedTodo) {
-        setText(selectedTodo.text)
+        text.set(selectedTodo.text)
       } else {
-        setText('')
+        text.set('')
         handleCloseModal();
       }
     }
   }, [todoId, handleCloseModal]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
+  const handleChange = (value: string) => {
+    text.set(value);
   };
 
   const handleUpdate = () => {
-    todosState.set(prevTodos =>
+    tasksList.set(prevTodos =>
       prevTodos.map(todo =>
-        todo.id === todoId ? { ...todo, text: text.trim() } : todo
+        todo.id === todoId ? { ...todo, text: text.get().trim() } : todo
       )
     );
     handleCloseModal();
@@ -76,9 +72,9 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
         <TextField
           label="Edit Todo"
           variant="outlined"
-          onChange={handleChange}
+          onChange={(e) => handleChange(e.target.value)}
           type="text"
-          value={text}
+          value={text.value}
           sx={{ width: '100%', mb: '1rem' }}
         />
         <Button

@@ -11,10 +11,10 @@ const initialTodos: Todo[] = [];
 const globalTodos = hookstate(initialTodos);
 
 export const useGlobalState = () => {
-  const todosState = useHookstate(globalTodos);
+  const tasksList = useHookstate(globalTodos);
 
   return {
-    todosState
+    tasksList
   };
 };
 // End of File (EOF)
