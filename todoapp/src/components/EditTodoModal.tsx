@@ -42,7 +42,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   const classes = useStyles();
   const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  const crudAPI = "https://crudcrud.com/api/ca64b1d6f8a443368e5156edb5cefc9d/todos"
+  const crudAPI = "https://crudcrud.com/api/a003d8ccd1f34e0ca1dce02bcac30fa1/todos"
 
   useEffect(() => {
     if (tasksList.value) {
@@ -54,7 +54,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
         handleCloseModal();
       }
     }
-  }, [todoId, handleCloseModal]);
+  }, [todoId, handleCloseModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (value: string) => {
     text.set(value);

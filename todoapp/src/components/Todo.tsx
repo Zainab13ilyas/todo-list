@@ -29,21 +29,21 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
-  const crudAPI = "https://crudcrud.com/api/ca64b1d6f8a443368e5156edb5cefc9d/todos"
+  const crudAPI = "https://crudcrud.com/api/a003d8ccd1f34e0ca1dce02bcac30fa1/todos"
 
   useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const response = await axios.get(crudAPI);
+        const todos = response.data;
+        tasksList.set(todos);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     fetchTodos();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const fetchTodos = async () => {
-    try {
-      const response = await axios.get(crudAPI);
-      const todos = response.data;
-      tasksList.set(todos);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const handleChange = (value: string) => {
     text.set(value);
