@@ -18,7 +18,7 @@ import { useHookstate } from "@hookstate/core";
 import axios from "axios";
 
 type Todo = {
-  _id: string;
+  _id: string,
   text: string;
   completed: boolean
 }
@@ -29,40 +29,37 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
-  const crudAPI = "https://crudcrud.com/api/bf99121fad7e486ab902cf76944c2f4f/todos"
+  const crudAPI = "https://crudcrud.com/api/8294360fe502453db515d4bc78dae699/todos"
 
   useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const response = await axios.get(crudAPI);
-        const todos = response.data;
-        tasksList.set(todos);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     fetchTodos();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const fetchTodos = async () => {
+    try {
+      const response = await axios.get(crudAPI);
+      const todos = response.data;
+      tasksList.set(todos);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleChange = (value: string) => {
     text.set(value);
   }
   const createTodo = async () => {
     const newText = text.get().trim()
-    const newTodo: Todo = {
-      _id: Date.now().toString(),
+    const newTodo = {
       text: newText,
       completed: false,
     };
     try {
       const response = await axios.post(crudAPI, newTodo);
-      // const createdTodo = response.data;
-      // const todoId = createdTodo._id;
-      //newTodo._id = todoId;
-      tasksList.set((prevTodos: Todo[]) => [...prevTodos, newTodo]);
+      const createdTodo = response.data;
+      tasksList.set((prevTodos: Todo[]) => [...prevTodos, createdTodo]);
       text.set("");
-      //await axios.put(`${crudAPI}/${todoId}`, newTodo);
+      fetchTodos()
     } catch (error) {
       console.error(error);
     }
@@ -90,11 +87,10 @@ const Todos = () => {
       const todoToUpdate = prevTodos.find((todo) => todo._id === id);
       if (todoToUpdate) {
         const updatedTodo: Todo = { ...todoToUpdate, completed: !todoToUpdate.completed };
-        console.log(updatedTodo)
-        const updatedTodosJSON = JSON.stringify(updatedTodo);
-        console.log(updatedTodosJSON)
+        const { completed, text } = todoToUpdate;
+        const updatedTodoToPut: Partial<Todo> = { completed: !completed, text };
         try {
-          await axios.put(`${crudAPI}/${id}`, updatedTodosJSON, {
+          await axios.put(`${crudAPI}/${id}`, updatedTodoToPut, {
             headers: { 'Content-Type': 'application/json' }
           });
           const updatedTodos = prevTodos.map((todo) => (todo._id === id ? updatedTodo : todo));

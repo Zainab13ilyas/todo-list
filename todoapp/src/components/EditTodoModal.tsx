@@ -32,6 +32,12 @@ const useStyles = makeStyles({
   },
 })
 
+type Todo = {
+  _id: string,
+  text: string;
+  completed: boolean
+}
+
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
@@ -42,7 +48,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   const classes = useStyles();
   const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  const crudAPI = "https://crudcrud.com/api/bf99121fad7e486ab902cf76944c2f4f/todos"
+  const crudAPI = "https://crudcrud.com/api/8294360fe502453db515d4bc78dae699/todos"
 
   useEffect(() => {
     if (tasksList.value) {
@@ -67,15 +73,15 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
       const updatedTodos = prevTodos.map((todo) =>
         todo._id === todoId ? { ...todo, text: text.get().trim() } : todo
       );
-      console.log(updatedTodos)
       tasksList.set(updatedTodos);
 
-      //await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for the state update
-      console.log(tasksList)
       const selectedTodo = updatedTodos.find((todo) => todo._id === todoId);
+
       if (selectedTodo) {
+        const { completed, text } = selectedTodo;
+        const updatedTodo: Partial<Todo> = { completed, text };
         try {
-          await axios.put(`${crudAPI}/${selectedTodo._id}`, selectedTodo);
+          await axios.put(`${crudAPI}/${selectedTodo._id}`, updatedTodo);
         } catch (error) {
           console.error(error);
         }
