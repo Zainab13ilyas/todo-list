@@ -18,7 +18,7 @@ import { useHookstate } from "@hookstate/core";
 import axios from "axios";
 
 type Todo = {
-  id: string;
+  _id: string;
   text: string;
   completed: boolean
 }
@@ -29,7 +29,7 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
-  const crudAPI = "https://crudcrud.com/api/a003d8ccd1f34e0ca1dce02bcac30fa1/todos"
+  const crudAPI = "https://crudcrud.com/api/bf99121fad7e486ab902cf76944c2f4f/todos"
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -51,18 +51,18 @@ const Todos = () => {
   const createTodo = async () => {
     const newText = text.get().trim()
     const newTodo: Todo = {
-      id: Date.now().toString(),
+      _id: Date.now().toString(),
       text: newText,
       completed: false,
     };
     try {
       const response = await axios.post(crudAPI, newTodo);
-      const createdTodo = response.data;
-      const todoId = createdTodo._id;
-      newTodo.id = todoId;
+      // const createdTodo = response.data;
+      // const todoId = createdTodo._id;
+      //newTodo._id = todoId;
       tasksList.set((prevTodos: Todo[]) => [...prevTodos, newTodo]);
       text.set("");
-      await axios.put(`${crudAPI}/${todoId}`, newTodo);
+      //await axios.put(`${crudAPI}/${todoId}`, newTodo);
     } catch (error) {
       console.error(error);
     }
@@ -72,7 +72,7 @@ const Todos = () => {
     try {
       await axios.delete(`${crudAPI}/${id}`);
       tasksList.set((prevTodos: Todo[]) =>
-        prevTodos.filter((todo) => todo.id !== id)
+        prevTodos.filter((todo) => todo._id !== id)
       );
     } catch (error) {
       console.error(error);
@@ -84,14 +84,20 @@ const Todos = () => {
   };
 
   const toggleTodo = async (id: string) => {
+
     const prevTodos = tasksList.get({ noproxy: true });
     if (prevTodos) {
-      const todoToUpdate = prevTodos.find((todo) => todo.id === id);
+      const todoToUpdate = prevTodos.find((todo) => todo._id === id);
       if (todoToUpdate) {
-        const updatedTodo = { ...todoToUpdate, completed: !todoToUpdate.completed };
+        const updatedTodo: Todo = { ...todoToUpdate, completed: !todoToUpdate.completed };
+        console.log(updatedTodo)
+        const updatedTodosJSON = JSON.stringify(updatedTodo);
+        console.log(updatedTodosJSON)
         try {
-          await axios.put(`${crudAPI}/${id}`, updatedTodo);
-          const updatedTodos = prevTodos.map((todo) => (todo.id === id ? updatedTodo : todo));
+          await axios.put(`${crudAPI}/${id}`, updatedTodosJSON, {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const updatedTodos = prevTodos.map((todo) => (todo._id === id ? updatedTodo : todo));
           tasksList.set(updatedTodos);
         } catch (error) {
           console.error(error);
@@ -129,15 +135,15 @@ const Todos = () => {
               className={classes.card}>
               <List >
                 {tasksList.value.map((todo: Todo, index: number) => (
-                  <React.Fragment key={todo.id}>
-                    <ListItem key={todo.id} className={classes.listItem}>
-                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo.id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                  <React.Fragment key={todo._id}>
+                    <ListItem key={todo._id} className={classes.listItem}>
+                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo._id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
                       />
                       <Box sx={{ marginRight: "50px" }}>
-                        <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo.id)}>
+                        <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo._id)}>
                           <EditIcon sx={{ color: "white" }} />
                         </IconButton>
-                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo.id)}>
+                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo._id)}>
                           <DeleteIcon sx={{ color: "white" }} />
                         </IconButton>
                       </Box>

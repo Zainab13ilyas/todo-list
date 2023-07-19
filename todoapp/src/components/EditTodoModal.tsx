@@ -42,11 +42,11 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   const classes = useStyles();
   const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  const crudAPI = "https://crudcrud.com/api/a003d8ccd1f34e0ca1dce02bcac30fa1/todos"
+  const crudAPI = "https://crudcrud.com/api/bf99121fad7e486ab902cf76944c2f4f/todos"
 
   useEffect(() => {
     if (tasksList.value) {
-      const selectedTodo = tasksList.value.find(todo => todo.id === todoId);
+      const selectedTodo = tasksList.value.find(todo => todo._id === todoId);
       if (selectedTodo) {
         text.set(selectedTodo.text)
       } else {
@@ -65,14 +65,17 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
 
     if (prevTodos) {
       const updatedTodos = prevTodos.map((todo) =>
-        todo.id === todoId ? { ...todo, text: text.get().trim() } : todo
+        todo._id === todoId ? { ...todo, text: text.get().trim() } : todo
       );
+      console.log(updatedTodos)
       tasksList.set(updatedTodos);
 
-      const selectedTodo = prevTodos.find((todo) => todo.id === todoId);
+      //await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for the state update
+      console.log(tasksList)
+      const selectedTodo = updatedTodos.find((todo) => todo._id === todoId);
       if (selectedTodo) {
         try {
-          await axios.put(`${crudAPI}/${selectedTodo.id}`, selectedTodo);
+          await axios.put(`${crudAPI}/${selectedTodo._id}`, selectedTodo);
         } catch (error) {
           console.error(error);
         }

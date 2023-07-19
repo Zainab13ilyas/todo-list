@@ -1,7 +1,7 @@
 import { hookstate, useHookstate } from "@hookstate/core";
 
 export type Todo = {
-  id: string;
+  _id: string;
   text: string;
   completed: boolean;
 };
