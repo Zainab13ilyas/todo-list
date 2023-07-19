@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   TextField,
   Card,
@@ -15,6 +15,7 @@ import TodoModal from 'components/EditTodoModal';
 import { useGlobalState } from "store/TodoStore";
 import useStyles from 'styles/TodoStyles';
 import { useHookstate } from "@hookstate/core";
+import axios from "axios";
 
 type Todo = {
   id: string;
@@ -28,54 +29,75 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
+  const crudAPI = "https://crudcrud.com/api/ca64b1d6f8a443368e5156edb5cefc9d/todos"
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    try {
+      const response = await axios.get(crudAPI);
+      const todos = response.data;
+      tasksList.set(todos);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleChange = (value: string) => {
     text.set(value);
   }
-  const createTodo = () => {
+  const createTodo = async () => {
     const newText = text.get().trim()
-    const prevTodos = tasksList.get();
-    if (selectedTodoState.value && prevTodos) {
-      const updatedTodos = prevTodos.map((todo) => {
-        if (todo.id === selectedTodoState.value) {
-          return { ...todo, text: newText };
-        }
-        return todo;
-      });
-
-      tasksList.set(updatedTodos);
-      selectedTodoState.set(null);
-    } else {
-      const newTodo: Todo = {
-        id: Date.now().toString(),
-        text: newText,
-        completed: false,
-      };
+    const newTodo: Todo = {
+      id: Date.now().toString(),
+      text: newText,
+      completed: false,
+    };
+    try {
+      const response = await axios.post(crudAPI, newTodo);
+      const createdTodo = response.data;
+      const todoId = createdTodo._id;
+      newTodo.id = todoId;
       tasksList.set((prevTodos: Todo[]) => [...prevTodos, newTodo]);
+      text.set("");
+      await axios.put(`${crudAPI}/${todoId}`, newTodo);
+    } catch (error) {
+      console.error(error);
     }
-
-    text.set('');
   };
 
-  const deleteTodo = (id: string) => {
-    tasksList.set((prevTodos: Todo[]) =>
-      prevTodos.filter((todo) => todo.id !== id)
-    );
+  const deleteTodo = async (id: string) => {
+    try {
+      await axios.delete(`${crudAPI}/${id}`);
+      tasksList.set((prevTodos: Todo[]) =>
+        prevTodos.filter((todo) => todo.id !== id)
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const closeModal = () => {
     selectedTodoState.set(null);
   };
 
-  const toggleTodo = (id: string) => {
+  const toggleTodo = async (id: string) => {
     const prevTodos = tasksList.get({ noproxy: true });
     if (prevTodos) {
-      const todos = prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-      tasksList.set(todos);
+      const todoToUpdate = prevTodos.find((todo) => todo.id === id);
+      if (todoToUpdate) {
+        const updatedTodo = { ...todoToUpdate, completed: !todoToUpdate.completed };
+        try {
+          await axios.put(`${crudAPI}/${id}`, updatedTodo);
+          const updatedTodos = prevTodos.map((todo) => (todo.id === id ? updatedTodo : todo));
+          tasksList.set(updatedTodos);
+        } catch (error) {
+          console.error(error);
+        }
+      }
     }
-
   };
   return (
     <Stack className={classes.root} >

@@ -3,6 +3,7 @@ import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useGlobalState } from 'store/TodoStore';
 import { useHookstate } from '@hookstate/core';
+import axios from 'axios';
 
 const useStyles = makeStyles({
   popUp: {
@@ -41,6 +42,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   const classes = useStyles();
   const { tasksList } = useGlobalState();
   const text = useHookstate('');
+  const crudAPI = "https://crudcrud.com/api/ca64b1d6f8a443368e5156edb5cefc9d/todos"
 
   useEffect(() => {
     if (tasksList.value) {
@@ -58,17 +60,28 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
     text.set(value);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     const prevTodos = tasksList.get({ noproxy: true });
 
     if (prevTodos) {
-      const todos = prevTodos.map((todo) =>
+      const updatedTodos = prevTodos.map((todo) =>
         todo.id === todoId ? { ...todo, text: text.get().trim() } : todo
-      )
-      tasksList.set(todos);
+      );
+      tasksList.set(updatedTodos);
+
+      const selectedTodo = prevTodos.find((todo) => todo.id === todoId);
+      if (selectedTodo) {
+        try {
+          await axios.put(`${crudAPI}/${selectedTodo.id}`, selectedTodo);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      handleCloseModal();
     }
-    handleCloseModal();
   };
+
   return (
     <Modal open={Boolean(todoId)} onClose={handleCloseModal}>
       <Box className={classes.popUp} >
