@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Card,
@@ -16,12 +16,8 @@ import { useGlobalState } from "store/TodoStore";
 import useStyles from 'styles/TodoStyles';
 import { useHookstate } from "@hookstate/core";
 import axios from "axios";
-
-type Todo = {
-  _id: string,
-  text: string;
-  completed: boolean
-}
+import { crudAPI, Todo } from 'components/Constants';
+import AlertModal from "./AlertModal";
 
 const Todos = () => {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
@@ -29,7 +25,7 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
-  const crudAPI = "https://crudcrud.com/api/8294360fe502453db515d4bc78dae699/todos"
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     fetchTodos();
@@ -50,6 +46,13 @@ const Todos = () => {
   }
   const createTodo = async () => {
     const newText = text.get().trim()
+    const prevTodos = tasksList.get({ noproxy: true });
+    if (prevTodos) {
+      if (prevTodos.find((todo) => todo.text === newText)) {
+        setShowAlert(true)
+        return;
+      }
+    }
     const newTodo = {
       text: newText,
       completed: false,
@@ -68,9 +71,7 @@ const Todos = () => {
   const deleteTodo = async (id: string) => {
     try {
       await axios.delete(`${crudAPI}/${id}`);
-      tasksList.set((prevTodos: Todo[]) =>
-        prevTodos.filter((todo) => todo._id !== id)
-      );
+      fetchTodos()
     } catch (error) {
       console.error(error);
     }
@@ -86,15 +87,13 @@ const Todos = () => {
     if (prevTodos) {
       const todoToUpdate = prevTodos.find((todo) => todo._id === id);
       if (todoToUpdate) {
-        const updatedTodo: Todo = { ...todoToUpdate, completed: !todoToUpdate.completed };
         const { completed, text } = todoToUpdate;
         const updatedTodoToPut: Partial<Todo> = { completed: !completed, text };
         try {
           await axios.put(`${crudAPI}/${id}`, updatedTodoToPut, {
             headers: { 'Content-Type': 'application/json' }
           });
-          const updatedTodos = prevTodos.map((todo) => (todo._id === id ? updatedTodo : todo));
-          tasksList.set(updatedTodos);
+          fetchTodos()
         } catch (error) {
           console.error(error);
         }
@@ -198,7 +197,12 @@ const Todos = () => {
           todoId={selectedTodoState.value}
           handleCloseModal={closeModal}
         />
-
+        {showAlert && (
+          <AlertModal
+            open={showAlert}
+            onClose={() => setShowAlert(false)}
+          />
+        )}
       </Box >
     </Stack >
   );

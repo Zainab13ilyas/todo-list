@@ -3,6 +3,7 @@ import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useGlobalState } from 'store/TodoStore';
 import { useHookstate } from '@hookstate/core';
+import { crudAPI, Todo } from 'components/Constants';
 import axios from 'axios';
 
 const useStyles = makeStyles({
@@ -32,12 +33,6 @@ const useStyles = makeStyles({
   },
 })
 
-type Todo = {
-  _id: string,
-  text: string;
-  completed: boolean
-}
-
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
@@ -48,7 +43,6 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   const classes = useStyles();
   const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  const crudAPI = "https://crudcrud.com/api/8294360fe502453db515d4bc78dae699/todos"
 
   useEffect(() => {
     if (tasksList.value) {
