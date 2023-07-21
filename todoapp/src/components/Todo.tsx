@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Card,
@@ -15,12 +15,10 @@ import TodoModal from 'components/EditTodoModal';
 import { useGlobalState } from "store/TodoStore";
 import useStyles from 'styles/TodoStyles';
 import { useHookstate } from "@hookstate/core";
-
-type Todo = {
-  id: string;
-  text: string;
-  completed: boolean
-}
+import axios from "axios";
+import { crudAPI, Todo } from 'components/Constants';
+import AlertModal from "./AlertModal";
+import { useGlobalAlertState } from "store/AlertStateStore";
 
 const Todos = () => {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
@@ -28,54 +26,82 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
+  const showAlert = useGlobalAlertState();
+  // const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    fetchTodos();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchTodos = async () => {
+    try {
+      const response = await axios.get(crudAPI);
+      const todos = response.data;
+      tasksList.set(todos);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleChange = (value: string) => {
     text.set(value);
   }
-  const createTodo = () => {
+
+  const createTodo = async () => {
     const newText = text.get().trim()
-    const prevTodos = tasksList.get();
-    if (selectedTodoState.value && prevTodos) {
-      const updatedTodos = prevTodos.map((todo) => {
-        if (todo.id === selectedTodoState.value) {
-          return { ...todo, text: newText };
-        }
-        return todo;
-      });
-
-      tasksList.set(updatedTodos);
-      selectedTodoState.set(null);
-    } else {
-      const newTodo: Todo = {
-        id: Date.now().toString(),
-        text: newText,
-        completed: false,
-      };
-      tasksList.set((prevTodos: Todo[]) => [...prevTodos, newTodo]);
+    const prevTodos = tasksList.get({ noproxy: true });
+    if (prevTodos) {
+      if (prevTodos.find((todo) => todo.text === newText)) {
+        showAlert.setAlert()
+        return;
+      }
     }
-
-    text.set('');
+    const newTodo = {
+      text: newText,
+      completed: false,
+    };
+    try {
+      const response = await axios.post(crudAPI, newTodo);
+      const createdTodo = response.data;
+      tasksList.set((prevTodos: Todo[]) => [...prevTodos, createdTodo]);
+      text.set("");
+      fetchTodos()
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    tasksList.set((prevTodos: Todo[]) =>
-      prevTodos.filter((todo) => todo.id !== id)
-    );
+  const deleteTodo = async (id: string) => {
+    try {
+      await axios.delete(`${crudAPI}/${id}`);
+      fetchTodos()
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const closeModal = () => {
     selectedTodoState.set(null);
   };
 
-  const toggleTodo = (id: string) => {
+  const toggleTodo = async (id: string) => {
+
     const prevTodos = tasksList.get({ noproxy: true });
     if (prevTodos) {
-      const todos = prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-      tasksList.set(todos);
+      const todoToUpdate = prevTodos.find((todo) => todo._id === id);
+      if (todoToUpdate) {
+        const { completed, text } = todoToUpdate;
+        const updatedTodoToPut: Partial<Todo> = { completed: !completed, text };
+        try {
+          await axios.put(`${crudAPI}/${id}`, updatedTodoToPut, {
+            headers: { 'Content-Type': 'application/json' }
+          });
+          fetchTodos()
+        } catch (error) {
+          console.error(error);
+        }
+      }
     }
-
   };
   return (
     <Stack className={classes.root} >
@@ -107,15 +133,15 @@ const Todos = () => {
               className={classes.card}>
               <List >
                 {tasksList.value.map((todo: Todo, index: number) => (
-                  <React.Fragment key={todo.id}>
-                    <ListItem key={todo.id} className={classes.listItem}>
-                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo.id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                  <React.Fragment key={todo._id}>
+                    <ListItem key={todo._id} className={classes.listItem}>
+                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo._id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
                       />
                       <Box sx={{ marginRight: "50px" }}>
-                        <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo.id)}>
+                        <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo._id)}>
                           <EditIcon sx={{ color: "white" }} />
                         </IconButton>
-                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo.id)}>
+                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo._id)}>
                           <DeleteIcon sx={{ color: "white" }} />
                         </IconButton>
                       </Box>
@@ -174,7 +200,11 @@ const Todos = () => {
           todoId={selectedTodoState.value}
           handleCloseModal={closeModal}
         />
-
+        {showAlert.getValue() && (
+          <AlertModal
+            onClose={() => showAlert.disableAlert()}
+          />
+        )}
       </Box >
     </Stack >
   );
