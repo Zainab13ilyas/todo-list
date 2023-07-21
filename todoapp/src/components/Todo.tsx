@@ -18,6 +18,7 @@ import { useHookstate } from "@hookstate/core";
 import axios from "axios";
 import { crudAPI, Todo } from 'components/Constants';
 import AlertModal from "./AlertModal";
+import { useGlobalAlertState } from "store/AlertStateStore";
 
 const Todos = () => {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
@@ -25,7 +26,8 @@ const Todos = () => {
   const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
-  const [showAlert, setShowAlert] = useState(false);
+  const showAlert = useGlobalAlertState();
+  // const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     fetchTodos();
@@ -44,12 +46,13 @@ const Todos = () => {
   const handleChange = (value: string) => {
     text.set(value);
   }
+
   const createTodo = async () => {
     const newText = text.get().trim()
     const prevTodos = tasksList.get({ noproxy: true });
     if (prevTodos) {
       if (prevTodos.find((todo) => todo.text === newText)) {
-        setShowAlert(true)
+        showAlert.setAlert()
         return;
       }
     }
@@ -197,10 +200,9 @@ const Todos = () => {
           todoId={selectedTodoState.value}
           handleCloseModal={closeModal}
         />
-        {showAlert && (
+        {showAlert.getValue() && (
           <AlertModal
-            open={showAlert}
-            onClose={() => setShowAlert(false)}
+            onClose={() => showAlert.disableAlert()}
           />
         )}
       </Box >

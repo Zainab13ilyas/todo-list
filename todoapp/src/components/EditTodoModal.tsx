@@ -4,6 +4,7 @@ import { makeStyles } from '@mui/styles';
 import { useGlobalState } from 'store/TodoStore';
 import { useHookstate } from '@hookstate/core';
 import { crudAPI, Todo } from 'components/Constants';
+import { useGlobalAlertState } from "store/AlertStateStore";
 import AlertModal from "./AlertModal";
 import axios from 'axios';
 
@@ -40,11 +41,11 @@ type TodoModalProps = {
 };
 
 const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
-
   const classes = useStyles();
   const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  const [showAlert, setShowAlert] = useState(false);
+  //const [showAlert, setShowAlert] = useState(false);
+  const showAlert = useGlobalAlertState();
 
   useEffect(() => {
     if (tasksList.value) {
@@ -71,7 +72,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
 
     if (prevTodos) {
       if (prevTodos.find((todo) => todo.text === selectedTodo?.text && todo._id !== selectedTodo._id)) {
-        setShowAlert(true)
+        showAlert.setAlert()
         return;
       }
       tasksList.set(updatedTodos);
@@ -114,8 +115,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
 
       {showAlert && (
         <AlertModal
-          open={showAlert}
-          onClose={() => setShowAlert(false)}
+          onClose={() => showAlert.disableAlert()}
         />
       )}
     </>
@@ -124,4 +124,3 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
 
 export default TodoModal;
 // End of File (EOF)
-

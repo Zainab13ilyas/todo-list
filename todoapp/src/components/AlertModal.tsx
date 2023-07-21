@@ -1,5 +1,6 @@
 import { Box, Modal, Typography, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
+import { useGlobalAlertState } from "store/AlertStateStore";
 
 const useStyles = makeStyles({
   popUp: {
@@ -43,13 +44,14 @@ const useStyles = makeStyles({
 })
 
 type AlertModalProps = {
-  open: boolean
   onClose: () => void;
 };
-const AlertModal = ({ open, onClose }: AlertModalProps) => {
+const AlertModal = ({ onClose }: AlertModalProps) => {
   const classes = useStyles();
+  const showAlert = useGlobalAlertState();
+
   return (
-    < Modal open={open} onClose={onClose} >
+    < Modal open={showAlert.getValue()} onClose={onClose} >
       <Box className={classes.popUp} >
         <Typography variant="h6"
           className={classes.headings}
@@ -73,4 +75,3 @@ const AlertModal = ({ open, onClose }: AlertModalProps) => {
 
 export default AlertModal;
 // End of File (EOF)
-
