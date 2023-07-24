@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { useGlobalState } from 'store/TodoStore';
 import { useHookstate } from '@hookstate/core';
 import { crudAPI, Todo } from 'components/Constants';
 import { useGlobalAlertState } from "store/AlertStateStore";
-import AlertModal from "./AlertModal";
+import AlertModal from "components/AlertModal";
 import axios from 'axios';
 
 const useStyles = makeStyles({
@@ -38,18 +37,18 @@ const useStyles = makeStyles({
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
+  todos: Todo[];
+  onEditTodo: (id: string, text: string) => void;
 };
 
-const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
+const TodoModal = ({ todoId, handleCloseModal, todos, onEditTodo }: TodoModalProps) => {
   const classes = useStyles();
-  const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  //const [showAlert, setShowAlert] = useState(false);
   const showAlert = useGlobalAlertState();
 
   useEffect(() => {
-    if (tasksList.value) {
-      const selectedTodo = tasksList.value.find(todo => todo._id === todoId);
+    if (todos) {
+      const selectedTodo = todos.find(todo => todo._id === todoId);
       if (selectedTodo) {
         text.set(selectedTodo.text)
       } else {
@@ -64,7 +63,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   };
 
   const handleUpdate = async () => {
-    const prevTodos = tasksList.get({ noproxy: true });
+    const prevTodos = todos;
     const updatedTodos = prevTodos.map((todo) =>
       todo._id === todoId ? { ...todo, text: text.get().trim() } : todo
     );
@@ -75,8 +74,9 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
         showAlert.setAlert()
         return;
       }
-      tasksList.set(updatedTodos);
-
+      if (selectedTodo) {
+        onEditTodo(selectedTodo?._id, selectedTodo?.text)
+      }
       if (selectedTodo) {
         const { completed, text } = selectedTodo;
         const updatedTodo: Partial<Todo> = { completed, text };

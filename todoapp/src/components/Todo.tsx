@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   TextField,
   Card,
@@ -11,50 +11,39 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import TodoModal from 'components/EditTodoModal';
-import { useGlobalState } from "store/TodoStore";
 import useStyles from 'styles/TodoStyles';
 import { useHookstate } from "@hookstate/core";
 import axios from "axios";
 import { crudAPI, Todo } from 'components/Constants';
-import AlertModal from "./AlertModal";
+import AlertModal from "components/AlertModal";
 import { useGlobalAlertState } from "store/AlertStateStore";
+import TodoModalContainer from "containers/EditTodoModalContainer";
 
-const Todos = () => {
+
+type TodosProps = {
+  todos: Todo[];
+  onAddTodo: (id: string, text: string) => void;
+  onDeleteTodo: (id: string) => void;
+  onToggleTodo: (id: string) => void;
+};
+
+const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo }: TodosProps) => {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
   const classes = useStyles();
-  const { tasksList } = useGlobalState();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
   const showAlert = useGlobalAlertState();
-  // const [showAlert, setShowAlert] = useState(false);
-
-  useEffect(() => {
-    fetchTodos();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchTodos = async () => {
-    try {
-      const response = await axios.get(crudAPI);
-      const todos = response.data;
-      tasksList.set(todos);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const handleChange = (value: string) => {
     text.set(value);
   }
 
   const createTodo = async () => {
-    const newText = text.get().trim()
-    const prevTodos = tasksList.get({ noproxy: true });
-    if (prevTodos) {
-      if (prevTodos.find((todo) => todo.text === newText)) {
-        showAlert.setAlert()
-        return;
-      }
+    const newText = text.get().trim();
+    const isDuplicate = todos.some((todo) => todo.text === newText);
+    if (isDuplicate) {
+      showAlert.setAlert();
+      return;
     }
     const newTodo = {
       text: newText,
@@ -63,18 +52,17 @@ const Todos = () => {
     try {
       const response = await axios.post(crudAPI, newTodo);
       const createdTodo = response.data;
-      tasksList.set((prevTodos: Todo[]) => [...prevTodos, createdTodo]);
-      text.set("");
-      fetchTodos()
+      onAddTodo(createdTodo._id, createdTodo.text);
     } catch (error) {
       console.error(error);
     }
+    text.set("");
   };
 
-  const deleteTodo = async (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
       await axios.delete(`${crudAPI}/${id}`);
-      fetchTodos()
+      onDeleteTodo(id);
     } catch (error) {
       console.error(error);
     }
@@ -84,22 +72,18 @@ const Todos = () => {
     selectedTodoState.set(null);
   };
 
-  const toggleTodo = async (id: string) => {
-
-    const prevTodos = tasksList.get({ noproxy: true });
-    if (prevTodos) {
-      const todoToUpdate = prevTodos.find((todo) => todo._id === id);
-      if (todoToUpdate) {
-        const { completed, text } = todoToUpdate;
-        const updatedTodoToPut: Partial<Todo> = { completed: !completed, text };
-        try {
-          await axios.put(`${crudAPI}/${id}`, updatedTodoToPut, {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          fetchTodos()
-        } catch (error) {
-          console.error(error);
-        }
+  const handleToggle = async (id: string) => {
+    const todoToUpdate = todos.find((todo) => todo._id === id);
+    if (todoToUpdate) {
+      const { completed, text } = todoToUpdate;
+      const updatedTodoToPut: Partial<Todo> = { completed: !completed, text };
+      try {
+        await axios.put(`${crudAPI}/${id}`, updatedTodoToPut, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        onToggleTodo(id)
+      } catch (error) {
+        console.error(error);
       }
     }
   };
@@ -127,27 +111,28 @@ const Todos = () => {
           direction="column"
           className={classes.stacktwo}
         >
-          {tasksList.value.length && (
+          {todos.length && (
             <Card
               variant="outlined"
               className={classes.card}>
               <List >
-                {tasksList.value.map((todo: Todo, index: number) => (
+                {todos.map((todo: Todo, index: number) => (
                   <React.Fragment key={todo._id}>
                     <ListItem key={todo._id} className={classes.listItem}>
-                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => toggleTodo(todo._id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                      <ListItemText primary={todo.text} className={classes.taskName} onClick={() => handleToggle(todo._id)} sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
                       />
                       <Box sx={{ marginRight: "50px" }}>
                         <IconButton aria-label="edit" onClick={() => selectedTodoState.set(todo._id)}>
                           <EditIcon sx={{ color: "white" }} />
                         </IconButton>
-                        <IconButton aria-label="delele" onClick={() => deleteTodo(todo._id)}>
+                        <IconButton aria-label="delele" onClick={() => handleDelete(todo._id)}>
                           <DeleteIcon sx={{ color: "white" }} />
                         </IconButton>
                       </Box>
                     </ListItem>
-                    {index !== tasksList.value.length - 1 &&
+                    {index !== todos.length - 1 && (
                       <Box sx={{ marginBottom: '5px' }} />
+                    )
                     }
 
                   </React.Fragment>
@@ -196,7 +181,7 @@ const Todos = () => {
           </Box>
         </Stack>
 
-        <TodoModal
+        <TodoModalContainer
           todoId={selectedTodoState.value}
           handleCloseModal={closeModal}
         />
