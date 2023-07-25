@@ -2,8 +2,7 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 import axios from "axios";
 import { TodoActionTypes } from "state/todos/TodoActions"
-import { Todo } from "components/Constants";
-import { crudAPI } from "components/Constants";
+import { Todo, crudAPI } from "components/Constants";
 
 function* fetchTodosSaga(): any {
   try {

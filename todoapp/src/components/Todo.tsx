@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   TextField,
   Card,
@@ -16,23 +16,30 @@ import { useHookstate } from "@hookstate/core";
 import axios from "axios";
 import { crudAPI, Todo } from 'components/Constants';
 import AlertModal from "components/AlertModal";
-import { useGlobalAlertState } from "store/AlertStateStore";
-import TodoModalContainer from "containers/EditTodoModalContainer";
+import EditTodoModalContainer from "containers/EditTodoModalContainer";
 
 
 type TodosProps = {
   todos: Todo[];
+  alertValue: boolean;
   onAddTodo: (id: string, text: string) => void;
   onDeleteTodo: (id: string) => void;
   onToggleTodo: (id: string) => void;
+  onSetAlert: () => void;
+  onDisableAlert: () => void;
+  fetchTodos: () => void;
 };
 
-const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo }: TodosProps) => {
+const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo, alertValue, onSetAlert, onDisableAlert, fetchTodos
+}: TodosProps) => {
   const isSmallScreen = useMediaQuery('(max-width:600px)');
   const classes = useStyles();
   const text = useHookstate("");
   const selectedTodoState = useHookstate<string | null>(null);
-  const showAlert = useGlobalAlertState();
+
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (value: string) => {
     text.set(value);
@@ -42,7 +49,7 @@ const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo }: TodosProps) => 
     const newText = text.get().trim();
     const isDuplicate = todos.some((todo) => todo.text === newText);
     if (isDuplicate) {
-      showAlert.setAlert();
+      onSetAlert();
       return;
     }
     const newTodo = {
@@ -181,13 +188,14 @@ const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo }: TodosProps) => 
           </Box>
         </Stack>
 
-        <TodoModalContainer
+        <EditTodoModalContainer
           todoId={selectedTodoState.value}
           handleCloseModal={closeModal}
         />
-        {showAlert.getValue() && (
+        {alertValue && (
           <AlertModal
-            onClose={() => showAlert.disableAlert()}
+            onClose={() => onDisableAlert()}
+            alertValue={alertValue}
           />
         )}
       </Box >

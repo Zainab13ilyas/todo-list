@@ -1,22 +1,34 @@
-import { useDispatch, useSelector } from "react-redux";
+import { connect } from "react-redux";
+import { Dispatch, bindActionCreators } from "redux"
 import { RootState } from "components/Constants";
 import TodoModal from "components/EditTodoModal";
 import { editTodo } from "state/todos/TodoActions";
+import { setAlert, disableAlert } from "state/todos/AlertActions";
 
-type TodoModalContainerProps = {
-  todoId: string | null;
-  handleCloseModal: () => void;
-}
-const TodoModalContainer = ({ todoId, handleCloseModal }: TodoModalContainerProps) => {
-  const dispatch = useDispatch();
-  const todos = useSelector((state: RootState) => state.todo.todos);
 
-  const handleUpdate = (todoId: string, text: string) => {
-    dispatch(editTodo(todoId, text));
-  }
-
-  return <TodoModal todoId={todoId} handleCloseModal={handleCloseModal} todos={todos} onEditTodo={handleUpdate} />;
+const mapStateToProps = (state: RootState) => {
+  return {
+    todos: state.todo.todos,
+    alertValue: state.alert.PopUpAlert,
+  };
 };
 
-export default TodoModalContainer;
+const mapDispatchToProps = (dispatch: Dispatch) => {
+  return bindActionCreators(
+    {
+      onEditTodo: editTodo,
+      onSetAlert: setAlert,
+      onDisableAlert: disableAlert,
+    },
+    dispatch
+  );
+};
+
+const EditTodoModalContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TodoModal);
+
+export default EditTodoModalContainer;
+
 // End of File (EOF)

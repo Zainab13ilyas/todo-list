@@ -3,7 +3,6 @@ import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useHookstate } from '@hookstate/core';
 import { crudAPI, Todo } from 'components/Constants';
-import { useGlobalAlertState } from "store/AlertStateStore";
 import AlertModal from "components/AlertModal";
 import axios from 'axios';
 
@@ -37,14 +36,16 @@ const useStyles = makeStyles({
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
-  todos: Todo[];
   onEditTodo: (id: string, text: string) => void;
+  onSetAlert: () => void;
+  onDisableAlert: () => void;
+  todos: Todo[];
+  alertValue: boolean;
 };
 
-const TodoModal = ({ todoId, handleCloseModal, todos, onEditTodo }: TodoModalProps) => {
+const TodoModal = ({ todoId, handleCloseModal, onEditTodo, onSetAlert, onDisableAlert, todos, alertValue }: TodoModalProps) => {
   const classes = useStyles();
   const text = useHookstate('');
-  const showAlert = useGlobalAlertState();
 
   useEffect(() => {
     if (todos) {
@@ -71,7 +72,7 @@ const TodoModal = ({ todoId, handleCloseModal, todos, onEditTodo }: TodoModalPro
 
     if (prevTodos) {
       if (prevTodos.find((todo) => todo.text === selectedTodo?.text && todo._id !== selectedTodo._id)) {
-        showAlert.setAlert()
+        onSetAlert()
         return;
       }
       if (selectedTodo) {
@@ -113,9 +114,10 @@ const TodoModal = ({ todoId, handleCloseModal, todos, onEditTodo }: TodoModalPro
         </Box>
       </Modal>
 
-      {showAlert && (
+      {alertValue && (
         <AlertModal
-          onClose={() => showAlert.disableAlert()}
+          onClose={() => onDisableAlert()}
+          alertValue={alertValue}
         />
       )}
     </>

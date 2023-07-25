@@ -1,4 +1,4 @@
-export const crudAPI = "https://crudcrud.com/api/5cf7428ca56444a485d7ee9c83ae593c/todos"
+export const crudAPI = "https://crudcrud.com/api/f918bc9749414520b3685961c0c4587a/todos"
 
 export type Todo = {
   _id: string,
@@ -10,5 +10,9 @@ export interface TodoState {
 }
 export interface RootState {
   todo: TodoState;
+  alert: AlertState;
+}
+export interface AlertState {
+  PopUpAlert: boolean;
 }
 // End of File (EOF)

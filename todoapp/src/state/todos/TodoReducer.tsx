@@ -36,6 +36,10 @@ const todoReducer = (state = initialState, action: TodoAction): TodoState => {
         ...state,
         todos: action.payload.todos,
       };
+    case TodoActionTypes.FETCH_TODOS_REQUEST:
+      return {
+        ...state,
+      };
     default:
       return state;
   }
