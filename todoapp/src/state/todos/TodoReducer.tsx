@@ -10,7 +10,11 @@ const todoReducer = (state = initialState, action: TodoAction): TodoState => {
     case TodoActionTypes.ADD_TODO:
       return {
         ...state,
-        todos: [...state.todos, { _id: action.payload.id, text: action.payload.text, completed: false }],
+      };
+    case TodoActionTypes.ADD_TODO_SUCCESS:
+      return {
+        ...state,
+        todos: [...state.todos, action.payload.todo],
       };
     case TodoActionTypes.TOGGLE_TODO:
       return {
@@ -24,6 +28,7 @@ const todoReducer = (state = initialState, action: TodoAction): TodoState => {
         ...state,
         todos: state.todos.filter((todo) => todo._id !== action.payload.id),
       };
+
     case TodoActionTypes.EDIT_TODO:
       return {
         ...state,

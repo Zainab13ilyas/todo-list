@@ -5,11 +5,10 @@ import TodoModal from "components/EditTodoModal";
 import { editTodo } from "state/todos/TodoActions";
 import { setAlert, disableAlert } from "state/todos/AlertActions";
 
-
 const mapStateToProps = (state: RootState) => {
   return {
     todos: state.todo.todos,
-    alertValue: state.alert.PopUpAlert,
+    alertValue: state.alert.popUpAlert,
   };
 };
 

@@ -15,7 +15,7 @@ import Todos from "components/Todo";
 const mapStateToProps = (state: RootState) => {
   return {
     todos: state.todo.todos,
-    alertValue: state.alert.PopUpAlert,
+    alertValue: state.alert.popUpAlert,
   };
 };
 

@@ -2,9 +2,8 @@ import { useEffect } from 'react';
 import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useHookstate } from '@hookstate/core';
-import { crudAPI, Todo } from 'components/Constants';
+import { Todo } from 'components/Constants';
 import AlertModal from "components/AlertModal";
-import axios from 'axios';
 
 const useStyles = makeStyles({
   popUp: {
@@ -36,7 +35,7 @@ const useStyles = makeStyles({
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
-  onEditTodo: (id: string, text: string) => void;
+  onEditTodo: (id: string, text: string, completed: boolean) => void;
   onSetAlert: () => void;
   onDisableAlert: () => void;
   todos: Todo[];
@@ -76,18 +75,8 @@ const TodoModal = ({ todoId, handleCloseModal, onEditTodo, onSetAlert, onDisable
         return;
       }
       if (selectedTodo) {
-        onEditTodo(selectedTodo?._id, selectedTodo?.text)
+        onEditTodo(selectedTodo?._id, selectedTodo?.text, selectedTodo?.completed)
       }
-      if (selectedTodo) {
-        const { completed, text } = selectedTodo;
-        const updatedTodo: Partial<Todo> = { completed, text };
-        try {
-          await axios.put(`${crudAPI}/${selectedTodo._id}`, updatedTodo);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
       handleCloseModal();
     }
   };

@@ -2,7 +2,7 @@ import { AlertAction, AlertActionTypes } from "./AlertActions";
 import { AlertState } from "components/Constants";
 
 const initialState: AlertState = {
-  PopUpAlert: false,
+  popUpAlert: false,
 };
 
 const alertReducer = (state = initialState, action: AlertAction): AlertState => {
@@ -10,12 +10,12 @@ const alertReducer = (state = initialState, action: AlertAction): AlertState => 
     case AlertActionTypes.SET_ALERT:
       return {
         ...state,
-        PopUpAlert: true,
+        popUpAlert: true,
       };
     case AlertActionTypes.DISABLE_ALERT:
       return {
         ...state,
-        PopUpAlert: false,
+        popUpAlert: false,
       };
     default:
       return state;

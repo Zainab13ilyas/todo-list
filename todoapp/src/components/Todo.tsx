@@ -13,18 +13,16 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import useStyles from 'styles/TodoStyles';
 import { useHookstate } from "@hookstate/core";
-import axios from "axios";
-import { crudAPI, Todo } from 'components/Constants';
+import { Todo } from 'components/Constants';
 import AlertModal from "components/AlertModal";
 import EditTodoModalContainer from "containers/EditTodoModalContainer";
-
 
 type TodosProps = {
   todos: Todo[];
   alertValue: boolean;
-  onAddTodo: (id: string, text: string) => void;
+  onAddTodo: (text: string) => void;
   onDeleteTodo: (id: string) => void;
-  onToggleTodo: (id: string) => void;
+  onToggleTodo: (id: string, text: string, completed: boolean) => void;
   onSetAlert: () => void;
   onDisableAlert: () => void;
   fetchTodos: () => void;
@@ -52,27 +50,12 @@ const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo, alertValue, onSet
       onSetAlert();
       return;
     }
-    const newTodo = {
-      text: newText,
-      completed: false,
-    };
-    try {
-      const response = await axios.post(crudAPI, newTodo);
-      const createdTodo = response.data;
-      onAddTodo(createdTodo._id, createdTodo.text);
-    } catch (error) {
-      console.error(error);
-    }
+    onAddTodo(newText);
     text.set("");
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await axios.delete(`${crudAPI}/${id}`);
-      onDeleteTodo(id);
-    } catch (error) {
-      console.error(error);
-    }
+  const handleDelete = (id: string) => {
+    onDeleteTodo(id);
   };
 
   const closeModal = () => {
@@ -83,15 +66,7 @@ const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo, alertValue, onSet
     const todoToUpdate = todos.find((todo) => todo._id === id);
     if (todoToUpdate) {
       const { completed, text } = todoToUpdate;
-      const updatedTodoToPut: Partial<Todo> = { completed: !completed, text };
-      try {
-        await axios.put(`${crudAPI}/${id}`, updatedTodoToPut, {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        onToggleTodo(id)
-      } catch (error) {
-        console.error(error);
-      }
+      onToggleTodo(id, text, completed)
     }
   };
   return (
