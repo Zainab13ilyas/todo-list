@@ -1,12 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Box, Modal, TextField, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { useGlobalState } from 'store/TodoStore';
 import { useHookstate } from '@hookstate/core';
-import { crudAPI, Todo } from 'components/Constants';
-import { useGlobalAlertState } from "store/AlertStateStore";
-import AlertModal from "./AlertModal";
-import axios from 'axios';
+import { Todo } from 'components/Constants';
+import AlertModal from "components/AlertModal";
 
 const useStyles = makeStyles({
   popUp: {
@@ -38,18 +35,20 @@ const useStyles = makeStyles({
 type TodoModalProps = {
   todoId: string | null;
   handleCloseModal: () => void;
+  onEditTodo: (id: string, text: string, completed: boolean) => void;
+  onSetAlert: () => void;
+  onDisableAlert: () => void;
+  todos: Todo[];
+  alertValue: boolean;
 };
 
-const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
+const TodoModal = ({ todoId, handleCloseModal, onEditTodo, onSetAlert, onDisableAlert, todos, alertValue }: TodoModalProps) => {
   const classes = useStyles();
-  const { tasksList } = useGlobalState();
   const text = useHookstate('');
-  //const [showAlert, setShowAlert] = useState(false);
-  const showAlert = useGlobalAlertState();
 
   useEffect(() => {
-    if (tasksList.value) {
-      const selectedTodo = tasksList.value.find(todo => todo._id === todoId);
+    if (todos) {
+      const selectedTodo = todos.find(todo => todo._id === todoId);
       if (selectedTodo) {
         text.set(selectedTodo.text)
       } else {
@@ -64,7 +63,7 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
   };
 
   const handleUpdate = async () => {
-    const prevTodos = tasksList.get({ noproxy: true });
+    const prevTodos = todos;
     const updatedTodos = prevTodos.map((todo) =>
       todo._id === todoId ? { ...todo, text: text.get().trim() } : todo
     );
@@ -72,21 +71,12 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
 
     if (prevTodos) {
       if (prevTodos.find((todo) => todo.text === selectedTodo?.text && todo._id !== selectedTodo._id)) {
-        showAlert.setAlert()
+        onSetAlert()
         return;
       }
-      tasksList.set(updatedTodos);
-
       if (selectedTodo) {
-        const { completed, text } = selectedTodo;
-        const updatedTodo: Partial<Todo> = { completed, text };
-        try {
-          await axios.put(`${crudAPI}/${selectedTodo._id}`, updatedTodo);
-        } catch (error) {
-          console.error(error);
-        }
+        onEditTodo(selectedTodo?._id, selectedTodo?.text, selectedTodo?.completed)
       }
-
       handleCloseModal();
     }
   };
@@ -113,9 +103,10 @@ const TodoModal = ({ todoId, handleCloseModal }: TodoModalProps) => {
         </Box>
       </Modal>
 
-      {showAlert && (
+      {alertValue && (
         <AlertModal
-          onClose={() => showAlert.disableAlert()}
+          onClose={() => onDisableAlert()}
+          alertValue={alertValue}
         />
       )}
     </>

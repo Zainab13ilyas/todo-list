@@ -1,12 +1,16 @@
 import './App.css';
-import Todos from './components/Todo';
+import TodosContainer from './containers/TodoContainer';
+import { Provider } from 'react-redux';
+import store from 'state/Store';
 
 function App() {
-
   return (
-    <div className="App">
-      <Todos />
-    </div>
+    <Provider store={store}>
+      <div className="App">
+        <TodosContainer />
+      </div>
+    </Provider>
+
   );
 }
 
