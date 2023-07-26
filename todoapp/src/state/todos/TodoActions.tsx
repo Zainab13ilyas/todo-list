@@ -40,18 +40,6 @@ interface DeleteTodoAction {
     id: string;
   };
 }
-/*interface DeleteTodoSuccessAction {
-  type: TodoActionTypes.DELETE_TODO_SUCCESS;
-  payload: {
-    todos: Todo[];
-  };
-}
-interface DeleteTodoFailureAction {
-  type: TodoActionTypes.DELETE_TODO_FAILURE;
-  payload: {
-    error: string;
-  };
-}*/
 interface EditTodoAction {
   type: TodoActionTypes.EDIT_TODO;
   payload: {

@@ -5,7 +5,6 @@ import { TodoActionTypes } from "state/todos/TodoActions"
 import { Todo, crudAPI } from "components/Constants";
 
 function* fetchTodosSaga(): any {
-  console.log("fetch")
   try {
     const response = yield call(axios.get, crudAPI);
     const todos: Todo[] = response.data;
@@ -16,7 +15,6 @@ function* fetchTodosSaga(): any {
 }
 
 function* addTodoSaga(action: { type: string, payload: { text: string } }): Generator<any, void, any> {
-  console.log("add")
   const newTodo = {
     text: action.payload.text,
     completed: false,
@@ -32,10 +30,8 @@ function* addTodoSaga(action: { type: string, payload: { text: string } }): Gene
 
 function* deleteTodoSaga(action: { type: string, payload: { id: string } }) {
   try {
-    console.log("Fgdf")
     const { id } = action.payload;
     yield call(axios.delete, `${crudAPI}/${id}`);
-    // yield put({ type: TodoActionTypes.DELETE_TODO, payload: { id } });
   } catch (error: any) {
     console.error(error)
   }
