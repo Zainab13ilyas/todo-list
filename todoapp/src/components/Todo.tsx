@@ -69,6 +69,7 @@ const Todos = ({ todos, onAddTodo, onDeleteTodo, onToggleTodo, alertValue, onSet
       onToggleTodo(id, text, completed)
     }
   };
+  console.log('efeffe')
   return (
     <Stack className={classes.root} >
       <Box
